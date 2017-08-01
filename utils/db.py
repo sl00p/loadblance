@@ -29,7 +29,9 @@ class Sql:
                 MEM TEXT,
                 DISKTOTAL TEXT,
                 DISKUSED TEXT,
-                DISKAVAIL TEXT);
+                DISKAVAIL TEXT,
+                NETWORK TEXT,
+                CONNECT TEXT);
                 """)
         except Exception as e:
             print("[E]: Sql create exception info, {0}.".format(e))
@@ -50,15 +52,17 @@ class Sql:
         try:
             host_info = self.host_info
             self.conn.execute("""INSERT INTO HOSTSTATUS
-                (IP, ALIVE, CPU, MEM, DISKTOTAL, DISKUSED, DISKAVAIL)
-                VALUES(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\");
+                (IP, ALIVE, CPU, MEM, DISKTOTAL, DISKUSED, DISKAVAIL, NETWORK, CONNECT)
+                VALUES(\"{0}\", \"{1}\", \"{2}\", \"{3}\", \"{4}\", \"{5}\", \"{6}\", \"{7}\", \"{8}\");
                 """.format(host_info["ip"],
                            host_info["alive"],
                            host_info["cpu"],
                            host_info["mem"],
                            host_info["disk"]["total"],
                            host_info["disk"]["used"],
-                           host_info["disk"]["avail"]))
+                           host_info["disk"]["avail"],
+                           host_info["net"],
+                           host_info["connect"]))
             self.conn.commit()
         except Exception as e:
             print("[E]: Sql insert exception info, {0}.".format(e))
@@ -73,13 +77,17 @@ class Sql:
                 MEM = \"{2}\",
                 DISKTOTAL = \"{3}\", 
                 DISKUSED = \"{4}\", 
-                DISKAVAIL = \"{5}\" WHERE IP == \"{6}\";
+                DISKAVAIL = \"{5}\",
+                NETWORK = \"{6}\",
+                CONNECT = \"{7}\" WHERE IP == \"{8}\";
                 """.format(host_info["alive"],
                            host_info["cpu"],
                            host_info["mem"],
                            host_info["disk"]["total"],
                            host_info["disk"]["used"],
                            host_info["disk"]["avail"],
+                           host_info["net"],
+                           host_info["connect"],
                            host_info["ip"]))
             self.conn.commit()
         except Exception as e:
