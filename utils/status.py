@@ -36,6 +36,16 @@ class HostStatus:
             print("[E]: Cpu status exception info, {0}.".format(e))
 
     @staticmethod
+    def load_status(top_status):
+        try:
+            pattern = re.compile(r"average: (\d+.\d+)")
+            items = pattern.findall(top_status)
+            #print(items)
+            return items
+        except Exception as e:
+            print("[E]: Memory status exception info, {0}.".format(e))
+
+    @staticmethod
     def mem_status(top_status):
         try:
             pattern = re.compile(r"(\d+[kKmMgG]) free")
@@ -55,13 +65,11 @@ class HostStatus:
                     df_status.append(c)
             disk = {
                 "total": df_status[7],
-                "used":  df_status[8],
                 "avail": df_status[9]
             }
         else:
             disk = {
                 "total": "None",
-                "used":  "None",
                 "avail": "None"
             }
         return disk
@@ -96,6 +104,12 @@ class HostStatus:
         else:
             self.host_info["cpu"] = "None"
 
+    def extract_load(self):
+        if self.result[0]:
+            self.host_info["load"] = self.load_status(self.result[0])[0]
+        else:
+            self.host_info["load"] = "None"
+
     def extract_mem(self):
         if self.result[0]:
             self.host_info["mem"] = self.mem_status(self.result[0])[0]
@@ -120,6 +134,7 @@ class HostStatus:
     def operate(self):
         self.connect()
         self.extract_cpu()
+        self.extract_load()
         self.extract_mem()
         self.extract_disk()
         self.extract_net()
@@ -127,7 +142,7 @@ class HostStatus:
 
     def return_host_info(self):
         self.operate()
-        print(self.host_info)
+        #print(self.host_info)
         return self.host_info
 
 
