@@ -12,7 +12,9 @@ IPV4    = 0x01
 IPV6    = 0x06
 DOMAIN  = 0x03
 BUFF_SIZE = 4096
-AUTH_CODE = b"\x00"
+AUTH_CODE = b"\x02"
+USERNAME  = b"test"
+PASSWD    = b"test"
 
 
 class ThreadingTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
@@ -29,6 +31,18 @@ class Socks5Server(socketserver.StreamRequestHandler):
             return False
         sock.send(b"\x05"+AUTH_CODE)
         return True
+
+    def auth_passwd(self):
+        sock = self.connection
+        ret = sock.recv(BUFF_SIZE)
+        if len(ret):
+            user_len, user_name = int(ret[1]), ret[2:2+int(ret[1])]
+            password_len, password = int(ret[2+user_len]), ret[3+user_len:]
+            if USERNAME == user_name and PASSWD == password:
+                sock.send(b"\x01\x00")
+                return True
+        sock.send(b"\x01\x01")
+        return False
 
     def parse_command(self):
         sock = self.connection
@@ -76,6 +90,9 @@ class Socks5Server(socketserver.StreamRequestHandler):
             self.timeout = 10
             if not self.select_method():
                 print("[E]: Select methond error.")
+                return False
+            if AUTH_CODE == b"\x02" and not self.auth_passwd():
+                print("[E]: Auth methond error.")
                 return False
             if not self.parse_command():
                 print("[E]: Parse methond error.")
