@@ -80,9 +80,9 @@ class Socks5Server(socketserver.StreamRequestHandler):
             if not self.parse_command():
                 print("[E]: Parse methond error.")
                 return False
-        except socket.error:
+        except socket.error as e:
             self.finish()
-            print("[E]: Socket error.")
+            print("[E]: Socket error. {0}".format(e))
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
